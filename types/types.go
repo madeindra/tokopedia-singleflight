@@ -1,6 +1,6 @@
 package types
 
-import "github.com/tokopedia/tdk/go/redis"
+import "github.com/go-redis/redis/v8"
 
 var (
 	RedisLocal *redis.Client

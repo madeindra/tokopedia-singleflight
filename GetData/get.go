@@ -3,17 +3,21 @@ package getdata
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"time"
+
+	"github.com/bagusandrian/dummy_app/types"
 )
 
 func GetData(w http.ResponseWriter, r *http.Request) {
 	var result string
 	ctxGetData := context.Background()
-	resultRedis := RedisLocal.Get(ctxGetData, "key_testing")
+	resultRedis := types.RedisLocal.Get(ctxGetData, "key_testing")
 	if resultRedis.Err() != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		resp := &ResponseData{
+		resp := &types.ResponseData{
 			ErrorCode:    http.StatusInternalServerError,
 			ErrorMessage: resultRedis.Err().Error(),
 		}
@@ -27,12 +31,12 @@ func GetData(w http.ResponseWriter, r *http.Request) {
 	if resultRedis.String() == "" {
 		result = "Hello Data Founded"
 		time.Sleep(1 * time.Second)
-		initData()
+		SetRedis()
 	} else {
 		result = resultRedis.String()
 	}
 	w.WriteHeader(http.StatusOK)
-	resp := &ResponseData{
+	resp := &types.ResponseData{
 		ErrorCode: http.StatusOK,
 		Result:    result,
 	}
@@ -41,4 +45,18 @@ func GetData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(b)
+}
+
+func SetRedis() {
+	key := "key_testing"
+	data := "Hello Data Founded"
+	ttl := time.Duration(3) * time.Minute
+
+	// store data using SET command
+	op1 := types.RedisLocal.Set(context.Background(), key, data, ttl)
+	if err := op1.Err(); err != nil {
+		fmt.Printf("unable to SET data. error: %v", err)
+		return
+	}
+	log.Println("finish init Redis")
 }
