@@ -16,6 +16,7 @@ func init() {
 	initRedis()
 	initData()
 }
+
 func main() {
 	http.HandleFunc("/get_data", func(w http.ResponseWriter, r *http.Request) {
 		// get data redis
